@@ -1,5 +1,17 @@
 version: '3.8'
+name: docker-lab-project
+
 services:
+  angular-client:
+      image: angular-client
+      build:
+          context: angular-client
+          dockerfile: ./Dockerfile
+      container_name: angular-client
+      restart: unless-stopped
+      networks:
+        - docker-lab
+
   mongodb:
     image: mongo:7.0
     container_name: database
@@ -12,6 +24,7 @@ services:
       - 27017:27017
     networks:
       - docker-lab
+    restart: unless-stopped
 
   api:
     image: api
@@ -23,19 +36,21 @@ services:
       - 3001:3001
     networks:
       - docker-lab
+    restart: unless-stopped
 
-  client:
-    image: client
-    build: 
-      context: client
-      dockerfile: ./Dockerfile
-    container_name: client
-    ports:
-      - 3000:3000
-    depends_on:
-      - api
-    networks:
-      - docker-lab
+  # client:
+  #   image: client
+  #   build: 
+  #     context: client
+  #     dockerfile: ./Dockerfile
+  #   container_name: client
+  #   ports:
+  #     - 3000:3000
+  #   depends_on:
+  #     - api
+  #   networks:
+  #     - docker-lab
+  #   restart: unless-stopped
   
   nginx:
     image: my_nginx
@@ -47,6 +62,9 @@ services:
       - 80:80
     networks:
       - docker-lab
+    depends_on:
+    - angular-client
+    restart: unless-stopped
 
 volumes:
   my_database_vol:
