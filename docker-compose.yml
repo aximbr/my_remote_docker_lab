@@ -1,0 +1,60 @@
+version: '3.8'
+services:
+  mongodb:
+    image: mongo:7.0
+    container_name: database
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_INITDB_ROOT_USERNAME}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD}
+    volumes:
+      - my_database_vol:/data/db
+    ports:
+      - 27017:27017
+    networks:
+      - docker-lab
+
+  api:
+    image: api
+    build: 
+      context: api
+      dockerfile: ./Dockerfile
+    container_name: server
+    ports:
+      - 3001:3001
+    networks:
+      - docker-lab
+
+  client:
+    image: client
+    build: 
+      context: client
+      dockerfile: ./Dockerfile
+    container_name: client
+    ports:
+      - 3000:3000
+    depends_on:
+      - api
+    networks:
+      - docker-lab
+  
+  nginx:
+    image: my_nginx
+    build:
+      context: nginx
+      dockerfile: ./Dockerfile
+    container_name: my_nginx
+    ports:
+      - 80:80
+    networks:
+      - docker-lab
+
+volumes:
+  my_database_vol:
+    driver: local
+
+networks:
+  docker-lab:
+    name: docker-lab
+    driver: bridge
+
+  
